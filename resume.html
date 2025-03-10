@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Diyar Askandar</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonts for both English and Kurdish -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Trebuchet+MS&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <style>
+    /* Basic CV styling for A4 layout */
+    body {
+      background-color: #ffffff;
+      color: #333333;
+      font-family: "Trebuchet MS", sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    /* When Kurdish is active, use the Noto Kufi Arabic font, set it to bold, and switch to RTL */
+    body.kurdish {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      direction: rtl;
+      font-weight: bold;
+    }
+    /* Container for the CV content that will be captured in the PDF */
+    #capture {
+      max-width: 800px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 20px;
+    }
+    .header-container {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #bdc3c7;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.8em;
+      letter-spacing: 1px;
+      color: #2c3e50;
+    }
+    h2 {
+      margin: 5px 0 0;
+      font-size: 1.5em;
+      color: #34495e;
+    }
+    .section-title {
+      font-size: 1.3em;
+      color: #2c3e50;
+      border-bottom: 1px solid #bdc3c7;
+      margin: 20px 0 10px;
+      padding-bottom: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    td {
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: top;
+    }
+    /* Fixed button styles (not captured in PDF) */
+    .button-group {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 2;
+    }
+    .action-button {
+      background: #333;
+      color: #999;
+      border: none;
+      padding: 8px 15px;
+      cursor: pointer;
+      border-radius: 3px;
+      font-family: "Trebuchet MS", sans-serif;
+      transition: all 0.3s;
+    }
+    .action-button:hover {
+      background: #444;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(103, 6, 108, 0.5);
+    }
+  </style>
+  <script language="JavaScript">
+    let isKurdish = false;
+
+    function toggleLanguage() {
+      isKurdish = !isKurdish;
+      updateTexts();
+      localStorage.setItem('language', isKurdish ? 'ku' : 'en');
+      if(isKurdish) {
+        document.body.classList.add("kurdish");
+      } else {
+        document.body.classList.remove("kurdish");
+      }
+    }
+
+    function updateTexts() {
+      const elements = document.querySelectorAll('[data-en], [data-ku]');
+      elements.forEach(el => {
+        el.textContent = isKurdish ? el.getAttribute('data-ku') : el.getAttribute('data-en');
+      });
+      document.getElementById('language-toggle').textContent = isKurdish ? 'ENGLISH' : 'KURDISH';
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      // Create an A4 PDF with 10mm margins
+      const margin = 10;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const availableWidth = pageWidth - 2 * margin;
+      const availableHeight = pageHeight - 2 * margin;
+      
+      // Capture only the CV content (excluding the buttons)
+      const captureElement = document.getElementById('capture');
+      const canvas = await html2canvas(captureElement, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+
+      // Calculate the dimensions for the captured image to fit within the available area while preserving aspect ratio.
+      const ratio = canvas.width / canvas.height;
+      let renderWidth = availableWidth;
+      let renderHeight = renderWidth / ratio;
+      if(renderHeight > availableHeight) {
+        renderHeight = availableHeight;
+        renderWidth = renderHeight * ratio;
+      }
+      
+      // Remove the duplicate header:
+      // We no longer add a separate header in the PDF since the capture already includes the CV header.
+      // Instead, we add the image starting at the top margin.
+      let y = margin;
+      doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
+
+      // If the captured content exceeds one page, add subsequent pages.
+      let remainingHeight = renderHeight - availableHeight;
+      while (remainingHeight > 0) {
+        doc.addPage();
+        y = margin - (renderHeight - remainingHeight);
+        doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
+        remainingHeight -= availableHeight;
+      }
+
+      // Save the PDF using the CV title (only one name appears)
+      const cvTitle = document.querySelector('h1').textContent.trim();
+      doc.save(cvTitle + '_CV.pdf');
+    }
+
+    window.onload = function() {
+      const savedLang = localStorage.getItem('language');
+      if(savedLang === 'ku') {
+        isKurdish = true;
+        updateTexts();
+        document.body.classList.add("kurdish");
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- CV content container -->
+  <div id="capture">
+    <div class="header-container">
+      <h1 data-en="Diyar Askandar" data-ku="دیار عەسکەندەر">Diyar Askandar</h1>
+      <h2 data-en="Network Manager" data-ku="بەڕێوەبەری تۆڕ">Network Manager</h2>
+    </div>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="section-title" data-en="Objective" data-ku="ئامانج">Objective</td>
+      </tr>
+      <tr>
+        <td data-en="A highly motivated Computer Science student and Network Manager at ADT Company with nearly three years of experience in network engineering, IT support, and graphic design. Seeking to leverage expertise in network infrastructure, troubleshooting, and programming to advance innovative IT solutions while continuing to excel academically and professionally." 
+            data-ku="خوێندکارێکی زانستی کۆمپیوتەر و بەڕێوەبەری تۆڕ لە کۆمپانیای ADT کە نزیکەی سێ ساڵ ئەزموونی لە ئەندازیاری تۆڕ، پاڵپشتی IT، و دیزاینی گرافیک هەیە.">
+          A highly motivated Computer Science student and Network Manager at ADT Company with nearly three years of experience in network engineering, IT support, and graphic design. Seeking to leverage expertise in network infrastructure, troubleshooting, and programming to advance innovative IT solutions while continuing to excel academically and professionally.
+        </td>
+      </tr>
+      <tr>
+        <td data-en="- One semester as an exchange student at the Faculty of Mathematics and Computer Science, Lodz University." 
+            data-ku="- یەک سەمیستەر وەک خوێندکارێکی گۆڕانکاری لە فاکەڵتی ماتماتیک و زانستی کۆمپیوتەر، زانکۆی لۆدز">- One semester as an exchange student at the Faculty of Mathematics and Computer Science, Lodz University.</td>
+      </tr>
+      <tr>
+        <td class="section-title" data-en="Contact Information" data-ku="زانیارییەکانی پەیوەندی">Contact Information</td>
+      </tr>
+      <tr>
+        <td data-en="0750 544 04 06" data-ku="٠٧٥٠ ٥٤٤ ٠٤ ٠٦">0750 544 04 06</td>
+      </tr>
+      <tr>
+        <td>diyaraskandar98@gmail.com</td>
+      </tr>
+      <tr>
+        <td data-en="Erbil, Iraq" data-ku="هەولێر، عێراق">Erbil, Iraq</td>
+      </tr>
+      <tr>
+        <td class="section-title" data-en="Education" data-ku="پەروەردە">Education</td>
+      </tr>
+      <tr>
+        <td data-en="Bachelor of Science in Computer Science<br>Cihan University, Erbil<br>September 2023 - Present" 
+            data-ku="بەکالۆریۆس لە زانستی کۆمپیوتەر<br>زانکۆی چیاڵی، هەولێر<br>ئەیلوول ٢٠٢٣ - تا ئێستا">
+          <strong data-en="Bachelor of Science in Computer Science" data-ku="بەکالۆریۆس لە زانستی کۆمپیوتەر">Bachelor of Science in Computer Science</strong><br>
+          Cihan University, Erbil<br>
+          September 2023 - Present
+        </td>
+      </tr>
+      <tr>
+        <td class="section-title" data-en="Languages" data-ku="زمانەکان">Languages</td>
+      </tr>
+      <tr>
+        <td data-en="Kurdish (Native) | English (Fluent) | Arabic (Proficient)" 
+            data-ku="کوردی (زگماکی) | ئینگلیزی (بە باشی) | عەرەبی (شارەزا)">
+          Kurdish (Native) | English (Fluent) | Arabic (Proficient)
+        </td>
+      </tr>
+      <tr>
+        <td class="section-title" data-en="Technical Skills" data-ku="تواناکانی تەکنیکی">Technical Skills</td>
+      </tr>
+      <tr>
+        <td data-en="Networking, Programming, and Tools" 
+            data-ku="تۆڕ، پرۆگرامسازی، و ئامرازەکان">
+          Networking, Programming, and Tools
+        </td>
+      </tr>
+      <tr>
+        <td class="section-title" data-en="Experience" data-ku="ئەزموون">Experience</td>
+      </tr>
+      <tr>
+        <td>
+          <strong data-en="Network Manager" data-ku="بەڕێوەبەری تۆڕ">Network Manager</strong><br>
+          ADT Company | June 2024 - Present<br>
+          - Designing and implementing network infrastructure<br>
+          - Maintaining network security systems<br>
+          - Troubleshooting complex network issues
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong data-en="IT Support Technician" data-ku="تەکنیکی پاڵپشتی IT">IT Support Technician</strong><br>
+          TANJ NET Technology | 2022 - 2024<br>
+          - Installed and maintained security systems<br>
+          - Managed IT operations for commercial clients<br>
+          - Implemented network configurations
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong data-en="Graphic Designer" data-ku="دیزاینەری گرافیک">Graphic Designer</strong><br>
+          Mirror Frame Agency | 2023<br>
+          - Created marketing materials<br>
+          - Developed branding solutions<br>
+          - Managed design projects
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="button-group">
+    <button class="action-button" onclick="generatePDF()" data-en="Download CV" data-ku="داگرتنی CV">Download CV</button>
+    <button id="language-toggle" class="action-button" onclick="toggleLanguage()">KURDISH</button>
+  </div>
+</body>
+</html>
