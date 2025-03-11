@@ -4,7 +4,7 @@
   <title>Diyar Askandar</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Fonts for both English and Kurdish -->
+  <!-- Fonts: English uses Trebuchet MS; Kurdish uses Noto Kufi Arabic -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Trebuchet+MS&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -19,13 +19,21 @@
       min-height: 100vh;
       line-height: 1.5;
     }
-    /* When Kurdish is active, use the Noto Kufi Arabic font, set it to bold, and switch to RTL */
+    .kurdish-text {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+    }
+    /* When Kurdish is active, use Noto Kufi Arabic and RTL */
     body.kurdish {
       font-family: 'Noto Kufi Arabic', sans-serif;
       direction: rtl;
-      font-weight: bold;
     }
-    /* Container for the CV content that will be captured in the PDF */
+    /* Override h1 in Kurdish mode: make it look like h2 but bigger */
+    body.kurdish h1 {
+      font-size: 3em;       /* Bigger than h2 */
+      color: #34495e;       /* Same color as h2 */
+      letter-spacing: 0;    /* Remove letter-spacing */
+    }
+    /* Container for the CV content */
     #capture {
       max-width: 800px;
       margin: auto;
@@ -75,19 +83,18 @@
       z-index: 2;
     }
     .action-button {
-      background: #333;
-      color: #999;
+      background: #34495e;
+      color: #ffffff;
       border: none;
-      padding: 8px 15px;
+      padding: 10px 15px;
       cursor: pointer;
       border-radius: 3px;
-      font-family: "Trebuchet MS", sans-serif;
       transition: all 0.3s;
+      font-family: "Trebuchet MS", sans-serif;
     }
     .action-button:hover {
-      background: #444;
+      background: #2c3e50;
       transform: scale(1.05);
-      box-shadow: 0 0 10px rgba(103, 6, 108, 0.5);
     }
   </style>
   <script language="JavaScript">
@@ -107,14 +114,14 @@
     function updateTexts() {
       const elements = document.querySelectorAll('[data-en], [data-ku]');
       elements.forEach(el => {
-        el.textContent = isKurdish ? el.getAttribute('data-ku') : el.getAttribute('data-en');
+        el.innerHTML = isKurdish ? el.getAttribute('data-ku') : el.getAttribute('data-en');
       });
       document.getElementById('language-toggle').textContent = isKurdish ? 'ENGLISH' : 'KURDISH';
     }
 
     async function generatePDF() {
       const { jsPDF } = window.jspdf;
-      // Create an A4 PDF with 10mm margins
+      // Create an A4 PDF with margins
       const margin = 10;
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -122,12 +129,12 @@
       const availableWidth = pageWidth - 2 * margin;
       const availableHeight = pageHeight - 2 * margin;
       
-      // Capture only the CV content (excluding the buttons)
+      // Capture only the CV content (excluding buttons)
       const captureElement = document.getElementById('capture');
       const canvas = await html2canvas(captureElement, { scale: 2 });
       const imgData = canvas.toDataURL('image/png');
 
-      // Calculate the dimensions for the captured image to fit within the available area while preserving aspect ratio.
+      // Calculate the dimensions for the captured image to fit within the available area.
       const ratio = canvas.width / canvas.height;
       let renderWidth = availableWidth;
       let renderHeight = renderWidth / ratio;
@@ -136,9 +143,7 @@
         renderWidth = renderHeight * ratio;
       }
       
-      // Remove the duplicate header:
-      // We no longer add a separate header in the PDF since the capture already includes the CV header.
-      // Instead, we add the image starting at the top margin.
+      // No duplicate header added here; the captured content already includes your CV header.
       let y = margin;
       doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
 
@@ -151,7 +156,7 @@
         remainingHeight -= availableHeight;
       }
 
-      // Save the PDF using the CV title (only one name appears)
+      // Save the PDF using the CV title for the filename.
       const cvTitle = document.querySelector('h1').textContent.trim();
       doc.save(cvTitle + '_CV.pdf');
     }
@@ -170,93 +175,95 @@
   <!-- CV content container -->
   <div id="capture">
     <div class="header-container">
-      <h1 data-en="Diyar Askandar" data-ku="دیار ئەسکەندەر">Diyar Askandar</h1>
-      <h2 data-en="Network Engineer" data-ku="ئەندازیاری نێتۆرک">Network Engineer </h2>
+      <h1 data-en="Diyar Askandar" data-ku="<strong>دیار ئەسکەندەر</strong>">Diyar Askandar</h1>
+      <h2 data-en="Network Engineer" data-ku="<strong>ئەندازیاری نێتۆرک</strong>">Network Engineer</h2>
     </div>
 
     <table border="0" cellpadding="0" cellspacing="0">
       <tr>
-        <td class="section-title" data-en="Objective" data-ku="ئامانج">Objective</td>
+        <td class="section-title" data-en="Objective" data-ku="<strong>ئامانج</strong>">Objective</td>
       </tr>
       <tr>
-        <td data-en="A highly motivated Computer Science student and Network Manager at ADT Company with nearly three years of experience in network engineering, IT support, and graphic design. Seeking to leverage expertise in network infrastructure, troubleshooting, and programming to advance innovative IT solutions while continuing to excel academically and professionally." 
-            data-ku="خوێندکارێکی زانستی کۆمپیوتەر و بەڕێوەبەری تۆڕ لە کۆمپانیای ADT کە نزیکەی سێ ساڵ ئەزموونی لە ئەندازیاری تۆڕ، پاڵپشتی IT، و دیزاینی گرافیک هەیە.">
-          A highly motivated Computer Science student and Network Manager at ADT Company with nearly three years of experience in network engineering, IT support, and graphic design. Seeking to leverage expertise in network infrastructure, troubleshooting, and programming to advance innovative IT solutions while continuing to excel academically and professionally.
+        <td data-en="Enthusiastic and dedicated Computer Science student entering the second year of university, with a robust background in IT support, networking, and graphic design. Seeking opportunities to leverage my technical skills and expand my experience in the field of computer science and technology." 
+            data-ku="<strong>خوێندکارێکی زانستی کۆمپیوتەر کە بەرەو ساڵی دووەمی زانکۆ دەچێت، بە شایەنی زۆر لە پاڵپشتی IT، تۆڕ، و دیزاینی گرافیک. بەدوای دەروازەکان بۆ بەکارهێنانی تواناکانی تەکنیکی و پەروەردەی ئەزموونەکانم لە بواری زانستی کۆمپیوتەر و تەکنەلۆژی.</strong>">
+          Enthusiastic and dedicated Computer Science student entering the second year of university, with a robust background in IT support, networking, and graphic design. Seeking opportunities to leverage my technical skills and expand my experience in the field of computer science and technology.
         </td>
       </tr>
       <tr>
-        <td data-en="- One semester as an exchange student at the Faculty of Mathematics and Computer Science, Lodz University." 
-            data-ku="- یەک سەمیستەر وەک خوێندکارێکی گۆڕانکاری لە فاکەڵتی ماتماتیک و زانستی کۆمپیوتەر، زانکۆی لۆدز">- One semester as an exchange student at the Faculty of Mathematics and Computer Science, Lodz University.</td>
+        <td class="section-title" data-en="Contact Information" data-ku="<strong>زانیارییەکانی پەیوەندی</strong>">Contact Information</td>
       </tr>
       <tr>
-        <td class="section-title" data-en="Contact Information" data-ku="زانیارییەکانی پەیوەندی">Contact Information</td>
-      </tr>
-      <tr>
-        <td data-en="0750 544 04 06" data-ku="٠٦ ٠٤ ٥٤٤ ٠٧٥٠">0750 544 04 06</td>
+        <td data-en="0750 544 04 06" data-ku="<strong>٠٧٥٠ ٥٤٤ ٠٤ ٠٦</strong>">0750 544 04 06</td>
       </tr>
       <tr>
         <td>diyaraskandar98@gmail.com</td>
       </tr>
       <tr>
-        <td data-en="Erbil, Iraq" data-ku="هەولێر، هەرێمی کوردستان عێڕاق">Erbil, Iraq</td>
+        <td data-en="Erbil, Iraq" data-ku="<strong>هەولێر، عێراق</strong>">Erbil, Iraq</td>
       </tr>
       <tr>
-        <td class="section-title" data-en="Education" data-ku="پەروەردە">Education</td>
+        <td class="section-title" data-en="Education" data-ku="<strong>پەروەردە</strong>">Education</td>
       </tr>
       <tr>
-        <td data-en="Bachelor of Science in Computer Science<br>Cihan University, Erbil<br>September 2023 - Present" 
-            data-ku="بەکالۆریۆس لە زانستی کۆمپیوتەر<br>زانکۆی جیهان، هەولێر<br>ئەیلوول ٢٠٢٣ - تا ئێستا">
-          <strong data-en="Bachelor of Science in Computer Science" data-ku="بەکالۆریۆس لە زانستی کۆمپیوتەر">Bachelor of Science in Computer Science</strong><br>
-          Cihan University, Erbil<br>
-          September 2023 - Present
+        <td data-en="Bachelor of Computer Science<br>Cihan University, Kurdistan<br>Expected Graduation: 2027<br><br>Exchange Program<br>Faculty of Computer Science and Mathematics, Łódź University, Poland<br>• Completed part of my Bachelor of Computer Science degree (summer 2025)." 
+            data-ku="<strong>بەکالۆریۆس لە زانستی کۆمپیوتەر</strong><br>زانکۆی چیاڵی، هەولێر<br>چاوەڕوانی کۆتایی خوێندن: ٢٠٢٧<br><br><strong>پڕۆگرامێکی گۆڕانکاری</strong><br>فاکەڵتی زانستی کۆمپیوتەر و ماتماتیک، زانکۆی لۆدز، پۆڵەندا<br>• بەشێکی خوێندنی بەکالۆریۆس لە زانستی کۆمپیوتەر تەواو کرد (هاوینی ٢٠٢٥).">
+          <strong>Bachelor of Computer Science</strong><br>
+          Cihan University, Kurdistan<br>
+          Expected Graduation: 2027<br><br>
+          <strong>Exchange Program</strong><br>
+          Faculty of Computer Science and Mathematics, Łódź University, Poland<br>
+          • Completed part of my Bachelor of Computer Science degree (summer 2025).
         </td>
       </tr>
       <tr>
-        <td class="section-title" data-en="Languages" data-ku="زمانەکان">Languages</td>
+        <td class="section-title" data-en="Languages" data-ku="<strong>زمانەکان</strong>">Languages</td>
       </tr>
       <tr>
         <td data-en="Kurdish (Native) | English (Fluent) | Arabic (Proficient)" 
-            data-ku="کوردی | ئینگلیزی | عەرەبی ">
-          Kurdish  | English  | Arabic 
+            data-ku="<strong>کوردی (زگماکی) | ئینگلیزی (بە باشی) | عەرەبی (شارەزا)</strong>">
+          Kurdish (Native) | English (Fluent) | Arabic (Proficient)
         </td>
       </tr>
       <tr>
-        <td class="section-title" data-en="Technical Skills" data-ku="تواناکانی تەکنیکی">Technical Skills</td>
+        <td class="section-title" data-en="Skills" data-ku="<strong>تواناکان</strong>">Skills</td>
       </tr>
       <tr>
-        <td data-en="Networking, Programming, and Tools" 
-            data-ku="تۆڕ، پرۆگرامسازی، و ئامرازەکان">
-          Networking, Programming, and Tools
+        <td data-en="Programming Languages: C++, Python (beginner), C# (beginner), SQL Server (beginner)<br>Web Development: HTML, CSS<br>Software Tools: Adobe Photoshop, Adobe Illustrator, Microsoft Office (Word, Excel, PowerPoint)<br>Network and IT Skills: Network configuration and installation, IT support, CCTV installation, Fire alarm systems, Electric meter configuration" 
+            data-ku="زمانەکانی پرۆگرامسازی: C++, Python (دەستپێکەری), C# (دەستپێکەری), SQL Server (دەستپێکەری)<br>پەرەپێدانی وێب: HTML, CSS<br>ئامرازەکانی بەرنامە: Adobe Photoshop, Adobe Illustrator, Microsoft Office (Word, Excel, PowerPoint)<br>تواناکانی تۆڕ و IT: شێوەپێدانی تۆڕ و دامەزراندن، پاڵپشتی IT، دامەزراندنی CCTV، سیستەمەکانی ئاگادارکەرەوەی ئاگر، شێوەپێدانی میتەرە کارەبایەکان">
+          Programming Languages: C++, Python (beginner), C# (beginner), SQL Server (beginner)<br>
+          Web Development: HTML, CSS<br>
+          Software Tools: Adobe Photoshop, Adobe Illustrator, Microsoft Office (Word, Excel, PowerPoint)<br>
+          Network and IT Skills: Network configuration and installation, IT support, CCTV installation, Fire alarm systems, Electric meter configuration
         </td>
       </tr>
       <tr>
-        <td class="section-title" data-en="Experience" data-ku="ئەزموون">Experience</td>
+        <td class="section-title" data-en="Experience" data-ku="<strong>ئەزموونی کارکردن</strong>">Experience</td>
       </tr>
       <tr>
         <td>
-          <strong data-en="Network Manager" data-ku="بەڕێوەبەری تۆڕ">Network Manager</strong><br>
-          ADT Company | June 2024 - Present<br>
-          - Designing and implementing network infrastructure<br>
-          - Maintaining network security systems<br>
-          - Troubleshooting complex network issues
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <strong data-en="IT Support Technician" data-ku="تەکنیکی پاڵپشتی IT">IT Support Technician</strong><br>
-          TANJ NET Technology | 2022 - 2024<br>
-          - Installed and maintained security systems<br>
-          - Managed IT operations for commercial clients<br>
-          - Implemented network configurations
+          <strong data-en="Network Manager" data-ku="<strong>بەڕێوەبەری تۆڕ</strong>">Network Manager</strong><br>
+          <span data-en="ADT Company | June 2024 - Present" data-ku="<strong>کۆمپانیای ADT | حوزەیرانی ٢٠٢٤ - تا ئێستا</strong>">ADT Company | June 2024 - Present</span><br>
+          <span data-en="- Designing and implementing network infrastructure" data-ku="<strong>- دیزاینکردن و جێبەجێکردنی پێکهاتەی تۆڕ</strong>">- Designing and implementing network infrastructure</span><br>
+          <span data-en="- Maintaining network security systems" data-ku="<strong>- پاراستنی سیستەمەکانی ئاسایش</strong>">- Maintaining network security systems</span><br>
+          <span data-en="- Troubleshooting complex network issues" data-ku="<strong>- چارەسەرکردنی کێشەکانی تۆڕی پیچراو</strong>">- Troubleshooting complex network issues</span>
         </td>
       </tr>
       <tr>
         <td>
-          <strong data-en="Graphic Designer" data-ku="دیزاینەری گرافیک">Graphic Designer</strong><br>
-          Mirror Frame Agency | 2023<br>
-          - Created marketing materials<br>
-          - Developed branding solutions<br>
-          - Managed design projects
+          <strong data-en="IT Support Technician" data-ku="<strong>تەکنیکی پاڵپشتی IT</strong>">IT Support Technician</strong><br>
+          <span data-en="TANJ NET Technology | July 2022 - January 2024" data-ku="<strong>تەنژ نێت تەکنەلۆجی | تەممووز ٢٠٢٢ - کانوونی دووەم ٢٠٢٤</strong>">TANJ NET Technology | July 2022 - January 2024</span><br>
+          <span data-en="- Installed and maintained security systems" data-ku="<strong>- دامەزراندن و پاراستنی سیستەمەکانی ئاسایش</strong>">- Installed and maintained security systems</span><br>
+          <span data-en="- Managed IT operations for commercial clients" data-ku="<strong>- بەڕێوەبردنی کارەکانی IT بۆ کڕیارانی بازرگانی</strong>">- Managed IT operations for commercial clients</span><br>
+          <span data-en="- Implemented network configurations" data-ku="<strong>- جێبەجێکردنی شێوەپێدانی تۆڕ</strong>">- Implemented network configurations</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong data-en="Graphic Designer" data-ku="<strong>دیزاینەری گرافیک</strong>">Graphic Designer</strong><br>
+          <span data-en="Mirror Frame Agency | May 2023 - December 2023" data-ku="<strong>ئێجەنسێکی مەری فریم | گەلاوێژ ٢٠٢٣ - کانوونی یەکەم ٢٠٢٣</strong>">Mirror Frame Agency | May 2023 - December 2023</span><br>
+          <span data-en="- Created marketing materials" data-ku="<strong>- دروستکردنی بەرگەکانی بازاڕکردن</strong>">- Created marketing materials</span><br>
+          <span data-en="- Developed branding solutions" data-ku="<strong>- پەرەپێدانی چارەسەرەکانی براندینگ</strong>">- Developed branding solutions</span><br>
+          <span data-en="- Managed design projects" data-ku="<strong>- بەڕێوەبردنی پرۆژەکانی دیزاین</strong>">- Managed design projects</span>
         </td>
       </tr>
     </table>
