@@ -125,6 +125,33 @@
             transform: scale(1.05);
             box-shadow: 0 0 10px rgba(103, 6, 108, 0.5);
         }
+
+        @media screen and (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                padding-left: 0;
+                align-items: center;
+            }
+            img {
+                width: 150px;
+                height: 187px;
+                margin: 10px auto;
+            }
+            h1 {
+                font-size: 2em;
+                margin-left: 0;
+                text-align: center;
+            }
+            h2 {
+                font-size: 1.2em;
+                margin-left: 0;
+                text-align: center;
+            }
+            .text-header {
+                left: 0;
+                padding: 0 15px;
+            }
+        }
     </STYLE>
     <SCRIPT LANGUAGE="JavaScript">
         let isKurdish = false;
