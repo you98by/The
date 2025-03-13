@@ -120,48 +120,60 @@
       document.getElementById('language-toggle').textContent = isKurdish ? 'ENGLISH' : 'KURDISH';
     }
 
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      // Create an A4 PDF with margins
-      const margin = 10;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const availableWidth = pageWidth - 2 * margin;
-      const availableHeight = pageHeight - 2 * margin;
-      
-      // Capture only the CV content (excluding buttons)
-      const captureElement = document.getElementById('capture');
-      const canvas = await html2canvas(captureElement, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
+   async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const fontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Trebuchet+MS&display=swap';
+  
+  // Load and embed fonts
+  const response = await fetch(fontUrl);
+  const cssText = await response.text();
+  const fontFaceRules = cssText.match(/@font-face\s*{[^}]*}/g);
+  const fontUrls = fontFaceRules.map(rule => rule.match(/url\(([^)]+)\)/)[1].replace(/['"]/g, ''));
 
-      // Calculate the dimensions for the captured image to fit within the available area.
-      const ratio = canvas.width / canvas.height;
-      let renderWidth = availableWidth;
-      let renderHeight = renderWidth / ratio;
-      if(renderHeight > availableHeight) {
-        renderHeight = availableHeight;
-        renderWidth = renderHeight * ratio;
-      }
-      
-      // No duplicate header added here; the captured content already includes your CV header.
-      let y = margin;
-      doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
+  // Fetch and add fonts to jsPDF
+  const fontPromises = fontUrls.map(url => fetch(url).then(res => res.arrayBuffer()));
+  const fonts = await Promise.all(fontPromises);
+  
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  const availableWidth = pageWidth - 2 * margin;
+  const availableHeight = pageHeight - 2 * margin;
 
-      // If the captured content exceeds one page, add subsequent pages.
-      let remainingHeight = renderHeight - availableHeight;
-      while (remainingHeight > 0) {
-        doc.addPage();
-        y = margin - (renderHeight - remainingHeight);
-        doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
-        remainingHeight -= availableHeight;
-      }
+  for (const font of fonts) {
+    const fontName = fontFaceRules.find(rule => rule.includes(url)).match(/font-family:\s*['"]?([^;'"]+)['"]?/)[1];
+    doc.addFileToVFS(`${fontName}.ttf`, font);
+    doc.addFont(`${fontName}.ttf`, fontName, 'normal');
+  }
 
-      // Save the PDF using the CV title for the filename.
-      const cvTitle = document.querySelector('h1').textContent.trim();
-      doc.save(cvTitle + '_CV.pdf');
-    }
+  const captureElement = document.getElementById('capture');
+  const canvas = await html2canvas(captureElement, { scale: 2 });
+  const imgData = canvas.toDataURL('image/png');
 
+  const ratio = canvas.width / canvas.height;
+  let renderWidth = availableWidth;
+  let renderHeight = renderWidth / ratio;
+  if (renderHeight > availableHeight) {
+    renderHeight = availableHeight;
+    renderWidth = renderHeight * ratio;
+  }
+
+  let y = margin;
+  doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
+
+  let remainingHeight = renderHeight - availableHeight;
+  while (remainingHeight > 0) {
+    doc.addPage();
+    y = margin - (renderHeight - remainingHeight);
+    doc.addImage(imgData, 'PNG', margin, y, renderWidth, renderHeight);
+    remainingHeight -= availableHeight;
+  }
+
+  const cvTitle = document.querySelector('h1').textContent.trim();
+  doc.save(cvTitle + '_CV.pdf');
+}
+    
     window.onload = function() {
       const savedLang = localStorage.getItem('language');
       if(savedLang === 'ku') {
