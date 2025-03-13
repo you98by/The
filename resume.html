@@ -120,36 +120,19 @@
       document.getElementById('language-toggle').textContent = isKurdish ? 'ENGLISH' : 'KURDISH';
     }
 
-   async function generatePDF() {
+ async function generatePDF() {
   const { jsPDF } = window.jspdf;
-  const fontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&family=Trebuchet+MS&display=swap';
-  
-  // Load and embed fonts
-  const response = await fetch(fontUrl);
-  const cssText = await response.text();
-  const fontFaceRules = cssText.match(/@font-face\s*{[^}]*}/g);
-  const fontUrls = fontFaceRules.map(rule => rule.match(/url\(([^)]+)\)/)[1].replace(/['"]/g, ''));
-
-  // Fetch and add fonts to jsPDF
-  const fontPromises = fontUrls.map(url => fetch(url).then(res => res.arrayBuffer()));
-  const fonts = await Promise.all(fontPromises);
-  
   const doc = new jsPDF('p', 'mm', 'a4');
+  
+  const captureElement = document.getElementById('capture');
+  const canvas = await html2canvas(captureElement, { scale: 2 });
+  const imgData = canvas.toDataURL('image/png');
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 10;
   const availableWidth = pageWidth - 2 * margin;
   const availableHeight = pageHeight - 2 * margin;
-
-  for (const font of fonts) {
-    const fontName = fontFaceRules.find(rule => rule.includes(url)).match(/font-family:\s*['"]?([^;'"]+)['"]?/)[1];
-    doc.addFileToVFS(`${fontName}.ttf`, font);
-    doc.addFont(`${fontName}.ttf`, fontName, 'normal');
-  }
-
-  const captureElement = document.getElementById('capture');
-  const canvas = await html2canvas(captureElement, { scale: 2 });
-  const imgData = canvas.toDataURL('image/png');
 
   const ratio = canvas.width / canvas.height;
   let renderWidth = availableWidth;
