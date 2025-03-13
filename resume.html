@@ -9,15 +9,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
-
-    @font-face {
-    font-family: 'MyCustomFont';
-    src: url('path/to/your/customfont.woff2') format('woff2'),
-         url('path/to/your/customfont.woff') format('woff');
-}
     /* Basic CV styling for A4 layout */
     body {
-      font-family: 'MyCustomFont', sans-serif;
       background-color: #ffffff;
       color: #333333;
       font-family: "Trebuchet MS", sans-serif;
@@ -27,19 +20,19 @@
       line-height: 1.5;
     }
     .kurdish-text {
-      font-family: 'MyCustomFont', sans-serif;
+      font-family: 'Noto Kufi Arabic', sans-serif;
     }
     /* When Kurdish is active, use Noto Kufi Arabic and RTL      */
 
     body.kurdish {
-      font-family: 'MyCustomFont', sans-serif;
+      font-family: 'Noto Kufi Arabic', sans-serif;
       direction: rtl;
       letter-spacing: 0;
     }
 
     /* Override h1 in Kurdish mode: make it look like h2 but bigger      */
     body.kurdish h1 {
-      font-family: 'MyCustomFont', sans-serif;
+      font-family: 'Noto Kufi Arabic', sans-serif;
       font-size: 3em;       /* Bigger than h2 */
       color: #34495e;       /* Same color as h2 */
       letter-spacing: 0;    /* Remove letter-spacing */
@@ -102,7 +95,7 @@
       cursor: pointer;
       border-radius: 3px;
       transition: all 0.3s;
-      font-family: "MyCustomFont", sans-serif;
+      font-family: "Trebuchet MS", sans-serif;
     }
     .action-button:hover {
       background: #2c3e50;
